@@ -2,7 +2,11 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification'
+import { useUserStore } from '../../store/user.js'
+const toast = useToast();
 
+const userStore = useUserStore();
 const form = ref({
   username: '',
   password: '',
@@ -17,9 +21,11 @@ const handleSubmit = async () => {
   if(form.value.username != null || form.value.password != null){
     try {
       const response = await axios.post('http://localhost:8000/login',form.value)
+      toast.success("Login successfully")
       console.log(response.data);
       successMessage.value = "Login successful";
       localStorage.setItem('token',response.data.token);
+      userStore.SetToken(response.data.token);
       setTimeout(() =>{
         successMessage.value=''
         form.value.username=''
@@ -30,7 +36,7 @@ const handleSubmit = async () => {
     }
     catch(error){
       console.error(error);
-      errorMessage.value = "Login Failed!";
+      toast.error("Login Failed")
     }
   }
 }

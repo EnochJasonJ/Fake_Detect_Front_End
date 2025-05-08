@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 const router = useRouter()
+
+const toast = useToast();
 
 const form = ref({
   username: '',
@@ -17,6 +20,7 @@ const handleSubmit = async () => {
   if(form.value.username != null || form.value.email != null || form.value.password != null){
     try {
       const response = await axios.post('http://localhost:8000/register',form.value)
+      toast.success("Registered successfully")
       console.log(response.data);
       successMessage.value = "Registration successful";
       setTimeout(() =>{
@@ -30,6 +34,7 @@ const handleSubmit = async () => {
     }
     catch(error){
       console.error(error);
+      toast.error("Registration Failed")
       errorMessage.value = "Registration Failed!";
     }
   }
@@ -37,7 +42,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center">
+  <div class="flex flex-col items-center justify-center mt-[200px]">
     <form @submit.prevent="handleSubmit" class="flex flex-col rounded-lg  bg-white form p-5" autocomplete="off">
       <input v-model="form.username" type="text" name="username" id="username" placeholder="User Name" class="placeholder:text-center mb-5 border-b-2 border-black px-20 py-2 outline-none" />
       <input v-model="form.email" type="email" name="email" id="email" placeholder="E-Mail" class="placeholder:text-center mb-5 border-b-2 border-black px-20 py-2 outline-none" />

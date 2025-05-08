@@ -1,11 +1,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { useToast } from 'vue-toastification'
+// /results
+//767
 
 const urls = ref([])
 const form = ref({ Product_URL: '' })
 const errorMessage = ref('')
 const token = localStorage.getItem('token')
+const toast = useToast()
 console.log(token)
 const headers = {
   'Content-Type': 'application/json',
@@ -21,26 +25,29 @@ const fetchdata = async () => {
   }
 }
 
-const deleteData = async (pk) =>{
+const deleteData = async (pk) => {
   try {
-    await axios.delete(`http://localhost:8000/postURL/${pk}/delete/`,{headers});
-    urls.value = urls.value.filter(url => url.id !== pk);
-    await fetchdata();
+    await axios.delete(`http://localhost:8000/postURL/${pk}/delete/`, { headers })
+    toast.success('Product deleted successfully.')
+    urls.value = urls.value.filter((url) => url.id !== pk)
+    await fetchdata()
   } catch (error) {
-      console.error(error);
+    console.error(error)
   }
 }
 
 const submitForm = async () => {
   try {
     await axios.post('http://localhost:8000/postURL', form.value, { headers })
-    await axios.post('http://localhost:8000/scrape/',form.value , { headers })
+    toast.success('It may take a while to fetch. Please stay calm!')
+    await axios.post('http://localhost:8000/scrape/', form.value, { headers })
     console.log(form.value)
     await fetchdata()
     form.value.Product_URL = ''
     errorMessage.value = ''
   } catch (error) {
-    errorMessage.value = 'Enter a valid URL'
+    // errorMessage.value = 'Enter a valid URL'
+    toast.error('Enter a valid URL!')
     form.value.Product_URL = ''
     console.error(error)
   }
@@ -58,47 +65,64 @@ onMounted(() => {
       class="flex flex-row gap-5 items-center justify-center mt-[150px] mb-10"
     >
       <div
-        class="flex flex-row gap-5 items-center justify-center bg-white frm px-[70px] py-5 rounded-md"
+        class="flex flex-row gap-5 items-center w-full max-w-[1024px] justify-center bg-white frm px-5 sm:px-10 md:px-20 lg:px-[70px] py-5 rounded-lg shadow-lg"
       >
         <input
           v-model="form.Product_URL"
           type="text"
           placeholder="Enter URL"
-          class="border-black border-b-2 placeholder:text-center px-3 py-2 outline-none"
+          class="border-gray-300 border-b-2 placeholder:text-center px-3 py-2 outline-none focus:border-blue-500 transition-all"
         />
-        <button type="submit" class="bttn bg-black text-white px-3 py-2 rounded-md">
+        <button
+          type="submit"
+          class="bttn bg-gradient-to-r from-blue-500 to-purple-500 text-white px-5 py-2 rounded-lg shadow-md hover:shadow-lg"
+        >
           POST URL
         </button>
       </div>
     </form>
-    <p v-if="errorMessage" class="text-red-500 text-center mb-5">
+    <p v-if="errorMessage" class="text-red-500 text-center mb-5 text-lg font-semibold">
       {{ errorMessage }}
     </p>
-    <div>
-      <ul
-        v-if="urls.length"
-        class="list flex flex-col gap-5 bg-slate-800 mx-[250px] px-[40px] py-[50px] rounded-lg mb-[75px]"
-      >
-        <li v-for="(url, index) in urls" :key="index" class="crd bg-slate-900 px-[20px] py-2 rounded-md">
-          <div class="flex flex-col items-center justify-center mb-10">
-            <div class="flex flex-row justify-between items-center gap-10">
-              <p class="text-slate-200 mt-5">{{ url.title }}</p>
-              <button @click="deleteData(url.id)" class="bg-red-600 del text-white px-3 py-2 rounded-md">Delete</button>
-            </div>
-            <div class="mt-10">
-              <img :src="url.image" alt="Image here" class="h-[200px] w-auto rounded-sm"/>
-            </div>
-            <div>
-              <p  v-if="(url.sentiment)" class="text-slate-200 mt-5 text-5xl">{{ url.sentiment }}</p>
-              <p v-else class="text-slate-200 mt-5 text-4xl">No Sentiment</p>
-            </div>
 
+    <div
+      v-if="urls.length"
+      class="flex flex-col gap-8 items-center bg-gray-100 p-10 rounded-lg shadow-lg"
+    >
+      <div
+        v-for="(url, index) in urls"
+        :key="index"
+        class="crd bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-all w-[90%] md:w-[70%] lg:w-[50%]"
+      >
+        <div class="flex flex-col items-center">
+          <img :src="url.image" alt="Image here" class="h-[200px] w-auto rounded-md mb-5" />
+          <p class="text-gray-800 text-lg font-semibold mb-3">{{ url.title }}</p>
+          <p v-if="url.sentiment" class="text-green-500 text-xl font-bold mb-3">
+            {{ url.sentiment }}
+          </p>
+          <p v-else class="text-gray-500 text-lg mb-3">No Sentiment</p>
+          <div class="flex flex-col md:flex-row gap-3 items-center justify-center w-full">
+            <button
+              @click="deleteData(url.id)"
+              class="del bg-red-500 text-white p-3 rounded-md hover:bg-red-600 transition-all"
+            >
+              Delete
+            </button>
+            <router-link
+              :to="`/results/${url.id}/`"
+              class="bg-gradient-to-r p-3 rounded-lg text-white from-blue-500 to-purple-500 hover:text-blue-300"
+            >
+              View Details
+            </router-link>
           </div>
-        </li>
-      </ul>
-      <div v-else class="bg-white px-5 py-10 rounded-md text-4xl text-gray-300 text-center">
-        No URL Given
+        </div>
       </div>
+    </div>
+    <div
+      v-else
+      class="bg-gray-200 px-10 py-20 rounded-lg text-2xl text-gray-500 text-center shadow-md"
+    >
+      No URL Given
     </div>
   </section>
 </template>
@@ -109,7 +133,7 @@ onMounted(() => {
   transition: all 0.7s ease-in-out;
 }
 .list:hover {
-  transform: scale(115%);
+  transform: scale(105%);
 }
 
 .bttn {
@@ -118,6 +142,7 @@ onMounted(() => {
 .bttn:hover {
   background-color: springgreen;
   color: black;
+  font-weight: bold;
 }
 
 .del {
@@ -135,12 +160,7 @@ onMounted(() => {
 }
 
 .crd {
-  box-shadow:
-    0px -5px 10px rgb(128, 49, 232),    /* Top - Purple */
-    5px 0px 10px rgb(0, 206, 89),    /* Right - Mint Green */
-    0px 5px 10px rgb(197, 0, 0),        /* Bottom - Red */
-    -5px 0px 10px rgb(255, 230, 132);     /* Left - Yellow */
+  box-shadow: 0px 3px 10px rgb(49, 171, 232); /* Left - Yellow */
+  /* 0px 5px 10px rgb(128, 49, 232); Left - Yellow */
 }
-
-
 </style>

@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import FormView from '@/components/FormView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import LoginView from '@/views/LoginView.vue'
+import SeperateView from '@/views/SeperateView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -18,6 +19,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+    },
+    {
+      path: '/results/:id',
+      name: 'results',
+      component: SeperateView,
     },
     {
       path: '/postURL',
