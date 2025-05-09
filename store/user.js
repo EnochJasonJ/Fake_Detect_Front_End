@@ -15,12 +15,13 @@ export const useUserStore = defineStore('user', () => {
   const fetchUser = async () => {
     if(!token.value) return
     try{
-      const response = await axios.get('http://localhost:8000/api/user',{
+      const response = await axios.get('https://fakedetectbackend-production.up.railway.app/api/user',{
         headers: {
           Authorization: `Token ${token.value}`
         },
       });
       user.value = response.data;
+      console.log(user.value);
     }
     catch(err){
       console.log(err)
