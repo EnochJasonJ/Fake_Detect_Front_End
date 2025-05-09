@@ -4,11 +4,17 @@ import FormView from '@/components/FormView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import LoginView from '@/views/LoginView.vue'
 import SeperateView from '@/views/SeperateView.vue'
+import LandingPage from '@/views/LandingPage.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+    path: '/',
+    name: 'land',
+    component: LandingPage
+  },
+    {
+      path: '/checkStatus',
       name: 'home',
       component: HomeView,
     },{
@@ -40,5 +46,16 @@ const router = createRouter({
     },
   ],
 })
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('token')
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/')
+  } else {
+    next()
+  }
+})
+
 
 export default router
