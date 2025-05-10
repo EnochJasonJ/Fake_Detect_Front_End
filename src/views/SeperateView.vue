@@ -106,7 +106,7 @@ function classifyProduct(){
       </div>
       <div class="flex-1 flex justify-center items-center">
         <img
-          :src="`https://akedetectbackend-production.up.railway.app${product.image}`"
+          :src="`https://fakedetectbackend-production.up.railway.app${product.image}`"
           alt="Product Image"
           class="product-image p-10 h-80 w-auto rounded-lg object-contain shadow-lg border border-gray-200"
         />
